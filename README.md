@@ -2,8 +2,10 @@
 some useful links
 
 ## Linear Regression
-- [Bayesian regression with STAN: Part 1 normal regression](https://www.r-bloggers.com/2016/01/bayesian-regression-with-stan-part-1-normal-regression/)
+
 - [Introduction to Bayesian Linear Regression](https://towardsdatascience.com/introduction-to-bayesian-linear-regression-e66e60791ea7)
+- [Bayesian regression with STAN: Part 1 normal regression](https://www.r-bloggers.com/2016/01/bayesian-regression-with-stan-part-1-normal-regression/)
+
 - [Bayesian Linear Regression: Analysis of Car Sales with arm in R](https://towardsdatascience.com/bayesian-linear-regression-analysis-of-car-sales-with-arm-in-r-b1147e79a9a4)
 - [Bayesian Statistics Overview and your first Bayesian Linear Regression Model](https://towardsdatascience.com/bayesian-statistics-overview-and-your-first-bayesian-linear-regression-model-ba566676c5a7)
 
@@ -35,4 +37,6 @@ some useful links
 
 - [stat animations](https://seeing-theory.brown.edu/#firstPage)
 - [*** The Markov-chain Monte Carlo Interactive Gallery](https://chi-feng.github.io/mcmc-demo/)
+- [A Zero-Math Introduction to Markov Chain Monte Carlo Methods](https://towardsdatascience.com/a-zero-math-introduction-to-markov-chain-monte-carlo-methods-dcba889e0c50)
+- [Markov Chain Monte Carlo in Python](https://towardsdatascience.com/markov-chain-monte-carlo-in-python-44f7e609be98)
 
