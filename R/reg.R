@@ -68,3 +68,4 @@ fit = stan(model_code = stanmodelcode,
            warmup = 2500,
            thin = 10,
            chains = 4)
+#
