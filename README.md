@@ -15,7 +15,7 @@ some useful links
 - [Smokin’ Bayes_logistic](https://mihagazvoda.com/posts/smoking-bayes/)
 
 - [Logistic Regression](https://medium.com/codex/bayesian-approach-in-logistic-regression-981f1387505b)
-- [Bayesian Logistic Regression](https://storopoli.io/Bayesian-Julia/pages/7_logistic_reg/)
+- [Bayesian Logistic Regression](https://storopoli.github.io/Bayesian-Julia/pages/07_logistic_reg/)
 - [Bayesian Logistic Regression with rstanarm](https://avehtari.github.io/modelselection/diabetes.html)
 - [Bayesian Logistic Regression with Stan](https://www.allyourbayes.com/post/2020-02-14-bayesian-logistic-regression-with-stan/)
 
