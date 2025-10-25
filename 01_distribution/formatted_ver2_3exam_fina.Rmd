@@ -16,6 +16,9 @@ header-includes:
   - \geometry{margin=1in}
 ---  
 
+view here  
+- [https://htmlpreview.github.io/?https://raw.githubusercontent.com/Yousuf28/bayesian_basics/refs/heads/main/01_distribution/formatted_ver2_3exam_fina.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/Yousuf28/bayesian_basics/refs/heads/main/01_distribution/formatted_ver2_3exam_fina.html)  
+
 # Binomial Distribution: From Model to Data and Data to Model
 
 ## Part I: Forward Problem - From Model to Data
@@ -1293,5 +1296,6 @@ For $\sigma^2$: Using Inverse-Gamma: [8.2, 22.1]
 - Small samples: t-distribution more appropriate than normal  
 - Large samples: Central Limit Theorem ensures normality of sample mean  
 - Rule of thumb: n ≥ 30 for normal approximation  
+
 
 
