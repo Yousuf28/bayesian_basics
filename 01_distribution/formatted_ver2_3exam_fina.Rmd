@@ -1,0 +1,1297 @@
+---
+title: "Statistical Distributions in Drug Development: Classical and Bayesian Approaches"
+author: "Advanced Statistical Analysis"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    keep_tex: true
+header-includes:
+  - \usepackage{amsmath}
+  - \usepackage{amssymb}
+  - \usepackage{geometry}
+  - \usepackage{amsthm}
+  - \usepackage{mathrsfs}
+  - \usepackage{bbm}
+  - \usepackage{dsfont}
+  - \geometry{margin=1in}
+---  
+
+# Binomial Distribution: From Model to Data and Data to Model
+
+## Part I: Forward Problem - From Model to Data
+
+### The Question We Are Asking
+
+**Given a known model with specified parameters, what is the probability of observing specific outcomes?**
+
+In this forward direction, we assume we know:  
+- The true success probability $p$ (the parameter)    
+- The number of trials $n$ (the sample size)    
+- The underlying binomial model    
+
+### __Question__
+**Question:** What is the probability of observing exactly $k$ successes?
+
+### Mathematical Framework and Symbol Definitions
+
+**Probability Mass Function:**
+$$P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+
+**Symbol Definitions:**  
+
+- $X$ = random variable representing the number of successes (what we observe)    
+- $k$ = specific number of successes we're calculating probability for (0, 1, 2, ..., n)    
+- $n$ = total number of independent trials (fixed and known)    
+- $p$ = probability of success on each individual trial (parameter, assumed known)    
+- $(1-p)$ = probability of failure on each individual trial    
+- $\binom{n}{k}$ = binomial coefficient = $\frac{n!}{k!(n-k)!}$ = number of ways to choose $k$ successes from $n$ trials    
+
+### Example 1: Phase II Oncology Trial (Forward Problem)
+
+**Clinical Setup and Known Parameters:**
+We are designing a Phase II trial for a new immunotherapy. 
+Based on extensive preclinical data and early Phase I results,
+we believe the true response rate is $p = 0.45$. We plan to enroll $n = 50$ patients.  
+
+**The Question:** 
+If our belief about the response rate is correct, what is the probability of observing exactly 25 responders?
+
+**Known Information:** 
+
+- $n = 50$ (planned sample size)    
+- $p = 0.45$ (hypothesized true response rate)    
+- $k = 25$ (specific outcome we're evaluating)    
+
+**Calculation:**
+$$P(X = 25) = \binom{50}{25} (0.45)^{25} (0.55)^{25}$$
+
+**Step-by-step computation:**
+$$\binom{50}{25} = \frac{50!}{25! \cdot 25!} = 126,410,606,437,752$$
+$$(0.45)^{25} = 1.427 \times 10^{-9}$$
+$$(0.55)^{25} = 2.346 \times 10^{-6}$$
+
+$$P(X = 25) = 126,410,606,437,752 \times 1.427 \times 10^{-9} \times 2.346 \times 10^{-6} = 0.0423$$
+
+**Clinical Interpretation:**
+If the true response rate is indeed 45%, there is a 4.23% probability of observing exactly 25 responders out of 50 patients.  
+This relatively low probability suggests that 25 responders would be a somewhat unusual (but not extremely rare) outcome under our assumed model.
+
+### Example 2: Fair Coin Experiment (Forward Problem)  
+
+
+**Setup and Known Parameters:**
+We have a fair coin with known probability$p = 0.50$ of landing heads.  
+We flip it $n = 20$ times.  
+
+**The Question:** What is the probability of getting exactly 12 heads?  
+
+**Known Information:**
+- $n = 20$ (number of flips)    
+- $p = 0.50$ (probability of heads for a fair coin)    
+- $k = 12$ (specific outcome we're evaluating)    
+
+**Calculation:**
+$$P(X = 12) = \binom{20}{12} (0.50)^{12} (0.50)^{8} = \binom{20}{12} (0.50)^{20}$$
+
+$$\binom{20}{12} = \frac{20!}{12! \cdot 8!} = 125,970$$
+$$(0.50)^{20} = 9.537 \times 10^{-7}$$
+
+$$P(X = 12) = 125,970 \times 9.537 \times 10^{-7} = 0.1201$$
+
+**Interpretation:**
+For a fair coin flipped 20 times, there is a 12.01% probability of getting exactly 12 heads. This is a reasonably likely outcome.
+
+### Example 3: Pharmacokinetic Bioavailability Study (Forward Problem)
+
+**Setup and Known Parameters:**
+Based on extensive bioequivalence studies, 
+we know that 85% of subjects typically achieve therapeutic plasma concentrations within 2 hours when given the reference formulation ($p = 0.85$). 
+We are testing $n = 30$ subjects.  
+
+**The Question:** What is the probability that exactly 26 subjects achieve therapeutic levels?
+
+**Known Information:**
+- $n = 30$ (number of subjects)    
+- $p = 0.85$ (known bioavailability rate for reference formulation)    
+- $k = 26$ (specific outcome we're evaluating)    
+
+**Calculation:**
+$$P(X = 26) = \binom{30}{26} (0.85)^{26} (0.15)^{4}$$
+
+$$\binom{30}{26} = \binom{30}{4} = 27,405$$
+$$(0.85)^{26} = 1.208 \times 10^{-3}$$
+$$(0.15)^{4} = 0.000506$$
+
+$$P(X = 26) = 27,405 \times 1.208 \times 10^{-3} \times 0.000506 = 0.0168$$
+
+**Interpretation:**
+If the true bioavailability rate is 85%, there is a 1.68% probability of observing exactly 26 out of 30 subjects achieving therapeutic levels. This is a relatively low probability event.
+
+## Part II: Inverse Problem - From Data to Model (Maximum Likelihood Estimation)
+
+### The Fundamental Question We Are Asking
+
+**Given observed data, what is the most likely value of the unknown parameter that could have generated this data?**
+
+In this inverse direction, we observe:
+- The actual number of successes $x$ (the data)  
+- The number of trials $n$ (known)  
+
+**Question:** What is the most likely value of the success probability $p$ that could have produced our observed data?
+
+### The Logic of Maximum Likelihood Estimation
+
+**Conceptual Framework:**  
+1. We observe some data (number of successes)  
+2. We assume the data came from a binomial process  
+3. We ask: "Of all possible values of $p$, which one makes our observed data most probable?"  
+4. The MLE is the value of $p$ that maximizes the probability of observing our actual data  
+
+### Mathematical Development  
+
+**Likelihood Function - The Key Concept:**
+The likelihood function $L(p)$ tells us how likely our observed data is for any given value of $p$.
+
+$$L(p) = P(\text{observe } x \text{ successes}|\text{parameter } p) = \binom{n}{x} p^x (1-p)^{n-x}$$
+
+**Symbol Definitions for MLE:**
+- $L(p)$ = likelihood function (probability of observed data given parameter $p$)    
+- $x$ = observed number of successes (the actual data we collected)    
+- $n$ = total number of trials (known)    
+- $p$ = unknown parameter we want to estimate (what we're solving for)    
+- $\hat{p}_{MLE}$ = maximum likelihood estimate (our best guess for $p$)    
+
+**Log-Likelihood Function:**
+We work with the log-likelihood because it's mathematically easier:  
+
+$$\ell(p) = \log L(p) = \log\binom{n}{x} + x\log(p) + (n-x)\log(1-p)$$
+
+**Where:**
+- $\ell(p)$ = log-likelihood function    
+- $\log\binom{n}{x}$ = constant term (doesn't depend on $p$)    
+- $x\log(p)$ = contribution from successes    
+- $(n-x)\log(1-p)$ = contribution from failures    
+
+### Finding the Maximum Likelihood Estimate
+
+**Step 1: Take the Derivative**  
+$$\frac{d\ell(p)}{dp} = \frac{x}{p} - \frac{n-x}{1-p}$$ 
+
+**Where:**
+- $\frac{x}{p}$ = rate of change due to successes    
+- $\frac{n-x}{1-p}$ = rate of change due to failures    
+
+**Step 2: Set Equal to Zero (First-Order Condition)**  
+$$\frac{x}{p} - \frac{n-x}{1-p} = 0$$
+
+**Step 3: Solve for $p$**  
+$$\frac{x}{p} = \frac{n-x}{1-p}$$
+$$x(1-p) = p(n-x)$$
+$$x - xp = pn - px$$
+$$x = pn$$
+$$\hat{p}_{MLE} = \frac{x}{n}$$
+
+**The Result:** The MLE is simply the observed proportion of successes!
+
+### Advanced MLE Theory
+
+**Fisher Information:**
+$$I(p) = -E\left[\frac{d^2\ell(p)}{dp^2}\right] = \frac{n}{p(1-p)}$$
+
+**Where:**
+- $I(p)$ = Fisher information (measures how much information the data contains about $p$)    
+- Higher Fisher information = more precise estimates    
+- Information is maximized when $p = 0.5$ (maximum uncertainty)    
+
+**Asymptotic Properties:**  
+For large $n$:
+$$\hat{p}_{MLE} \sim N\left(p, \frac{p(1-p)}{n}\right)$$
+
+**Where:**  
+- $\hat{p}_{MLE}$ is approximately normally distributed  
+- Mean = true parameter $p$ (unbiased)  
+- Variance = $\frac{p(1-p)}{n}$ (decreases with sample size)  
+
+### Example 1: Oncology Trial MLE Analysis
+
+**The Data and Question:**
+We conducted our Phase II trial and observed $x = 22$ responders out of $n = 50$ patients.
+
+**Question:** What is our best estimate of the true response rate $p$?
+
+**MLE Calculation:**
+$$\hat{p}_{MLE} = \frac{x}{n} = \frac{22}{50} = 0.44$$
+
+**Standard Error:**
+$$SE(\hat{p}_{MLE}) = \sqrt{\frac{\hat{p}_{MLE}(1-\hat{p}_{MLE})}{n}} = \sqrt{\frac{0.44 \times 0.56}{50}} = 0.0702$$
+
+**95% Confidence Interval:**
+$$CI_{95\%} = 0.44 \pm 1.96 \times 0.0702 = [0.302, 0.578]$$
+
+**Clinical Interpretation:**
+- Our best estimate of the true response rate is 44%  
+- We are 95% confident the true response rate lies between 30.2% and 57.8%  
+- This range includes our hypothesized 45%, suggesting our initial belief was reasonable  
+- The range also includes clinically meaningful response rates (>30%)  
+
+**Likelihood Function Analysis:**
+The likelihood function $L(p) = \binom{50}{22} p^{22} (1-p)^{28}$ is maximized at $p = 0.44$.
+
+### Example 2: Coin Flipping MLE Analysis
+
+**The Data and Question:**
+We flipped a coin 20 times and observed $x = 12$ heads.
+
+**Question:** Based on this data, what is our best estimate of the probability of heads?
+
+**MLE Calculation:**
+$$\hat{p}_{MLE} = \frac{12}{20} = 0.60$$
+
+**Standard Error:**
+$$SE(\hat{p}_{MLE}) = \sqrt{\frac{0.60 \times 0.40}{20}} = 0.110$$
+
+**95% Confidence Interval:**
+$$CI_{95\%} = 0.60 \pm 1.96 \times 0.110 = [0.384, 0.816]$$
+
+**Interpretation:**
+- Our best estimate is that this coin has a 60% probability of heads  
+- However, the confidence interval [0.384, 0.816] includes 0.50  
+- We cannot conclude the coin is unfair based on this data  
+- The wide interval reflects the uncertainty due to small sample size  
+
+### Example 3: Bioavailability Study MLE Analysis
+
+**The Data and Question:**
+In our bioavailability study, $x = 26$ out of $n = 30$ subjects achieved therapeutic levels.
+
+**Question:** What is our best estimate of the bioavailability rate for this formulation?
+
+**MLE Calculation:**
+$$\hat{p}_{MLE} = \frac{26}{30} = 0.867$$
+
+**Standard Error:**
+$$SE(\hat{p}_{MLE}) = \sqrt{\frac{0.867 \times 0.133}{30}} = 0.062$$
+
+**95% Confidence Interval:**
+$$CI_{95\%} = 0.867 \pm 1.96 \times 0.062 = [0.745, 0.989]$$
+
+**Regulatory Interpretation:**
+- Our best estimate is 86.7% bioavailability  
+- The lower bound (74.5%) exceeds typical regulatory thresholds (70-80%)  
+- This provides strong evidence for adequate bioavailability  
+- The upper bound approaches 100%, which is biologically plausible  
+
+### Advanced MLE Considerations
+
+**Boundary Issues:**
+When $x = 0$: $\hat{p}_{MLE} = 0$ (boundary estimate)
+When $x = n$: $\hat{p}_{MLE} = 1$ (boundary estimate)
+
+These boundary estimates can be problematic because:
+- Standard errors become undefined or infinite  
+- Confidence intervals may not be meaningful  
+- Alternative methods (Bayesian, exact methods) may be preferred  
+
+**Small Sample Corrections:**
+For small samples, consider:
+- Wilson confidence intervals  
+- Exact binomial confidence intervals  
+- Bayesian methods with informative priors  
+
+**Likelihood Ratio Tests:**
+To test $H_0: p = p_0$ vs. $H_1: p \neq p_0$:
+
+$$\Lambda = 2[\ell(\hat{p}_{MLE}) - \ell(p_0)]$$
+
+Under $H_0$: $\Lambda \sim \chi^2_1$ for large $n$
+
+### Why MLE Works: Theoretical Justification
+
+**Consistency:** As $n \to \infty$, $\hat{p}_{MLE} \to p$ (converges to true value)
+
+**Asymptotic Normality:** For large $n$, $\hat{p}_{MLE}$ is approximately normal
+
+**Efficiency:** MLE achieves the Cramér-Rao lower bound (minimum possible variance)
+
+**Invariance:** If $\hat{\theta}_{MLE}$ is the MLE of $\theta$, then $g(\hat{\theta}_{MLE})$ is the MLE of $g(\theta)$
+
+## Part III: Bayesian Approach - Combining Prior Knowledge with Data
+
+### The Fundamental Question We Are Asking
+
+**Given our prior beliefs about the parameter and observed data, what should we believe about the parameter now?**
+
+In the Bayesian approach, we:
+1. Start with prior beliefs about $p$ (before seeing data)
+2. Observe data
+3. Update our beliefs using Bayes' theorem
+4. End with posterior beliefs about $p$ (after seeing data)
+
+**Key Difference from MLE:** Bayesian methods incorporate prior knowledge, while MLE uses only the current data.
+
+### Bayes' Theorem for Parameter Estimation
+
+**Bayes' Theorem:**
+$$P(\text{parameter}|\text{data}) = \frac{P(\text{data}|\text{parameter}) \times P(\text{parameter})}{P(\text{data})}$$
+
+**In our notation:**
+$$f(p|x) = \frac{L(p) \times f(p)}{P(x)}$$
+
+**Where:**
+- $f(p|x)$ = posterior distribution (what we want - our updated beliefs about $p$)  
+- $L(p)$ = likelihood function (same as in MLE - how likely the data is given $p$)  
+- $f(p)$ = prior distribution (our initial beliefs about $p$ before seeing data)  
+- $P(x)$ = marginal probability of data (normalizing constant)  
+
+### Beta-Binomial Conjugacy: A Mathematical Miracle
+
+**Why Beta Prior?**
+The Beta distribution is the **conjugate prior** for the binomial likelihood, meaning:
+- Prior: Beta distribution  
+- Likelihood: Binomial  
+- Posterior: Also Beta distribution (same family!)  
+
+**Beta Distribution:**
+$$f(p|\alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} p^{\alpha-1} (1-p)^{\beta-1}$$
+
+**Symbol Definitions:**
+- $\alpha$ = prior "successes" + 1 (shape parameter)  
+- $\beta$ = prior "failures" + 1 (shape parameter)  
+- $\Gamma(\cdot)$ = gamma function (generalization of factorial)  
+- $\alpha + \beta$ = prior "sample size" (strength of prior belief)  
+
+**Prior Interpretation:**
+- Prior mean: $E[p] = \frac{\alpha}{\alpha + \beta}$  
+- Prior variance: $\text{Var}(p) = \frac{\alpha\beta}{(\alpha + \beta)^2(\alpha + \beta + 1)}$  
+- As $\alpha + \beta$ increases, prior becomes more concentrated (stronger belief)  
+
+### Bayesian Updating Formula
+
+**Conjugate Updating:**
+$$\text{Prior: } p \sim \text{Beta}(\alpha_0, \beta_0)$$
+$$\text{Data: } x \text{ successes in } n \text{ trials}$$
+$$\text{Posterior: } p|x \sim \text{Beta}(\alpha_0 + x, \beta_0 + n - x)$$
+
+**Posterior Parameters:**
+- $\alpha_n = \alpha_0 + x$ (prior successes + observed successes)  
+- $\beta_n = \beta_0 + (n - x)$ (prior failures + observed failures)  
+
+**Posterior Mean:**
+$$E[p|x] = \frac{\alpha_0 + x}{\alpha_0 + \beta_0 + n}$$
+
+This is a **weighted average** of prior mean and sample proportion:
+$$E[p|x] = \frac{\alpha_0 + \beta_0}{\alpha_0 + \beta_0 + n} \times \frac{\alpha_0}{\alpha_0 + \beta_0} + \frac{n}{\alpha_0 + \beta_0 + n} \times \frac{x}{n}$$
+
+### Example 1: Oncology Trial Bayesian Analysis
+
+**Setting Up the Prior:**
+Based on previous studies of similar immunotherapies, we believe:
+- Most likely response rate: 30%  
+- Reasonable range: 15% to 50%  
+- Moderate confidence (equivalent to about 20 prior patients)  
+
+**Prior Selection:** $\text{Beta}(6, 14)$
+- Prior mean: $\frac{6}{6+14} = 0.30$ (30%)  
+- Prior "sample size": $6 + 14 = 20$  
+- Prior standard deviation: $\sqrt{\frac{6 \times 14}{20^2 \times 21}} = 0.10$  
+
+**The Data:** $x = 22$ successes in $n = 50$ trials
+
+**Posterior Calculation:**
+$$\text{Posterior: } p|x \sim \text{Beta}(6 + 22, 14 + 50 - 22) = \text{Beta}(28, 42)$$
+
+**Posterior Analysis:**
+$$E[p|x] = \frac{28}{28 + 42} = \frac{28}{70} = 0.40$$
+
+**Comparison of Estimates:**
+- Prior mean: 0.30  
+- MLE: $\frac{22}{50} = 0.44$  
+- Posterior mean: 0.40 (between prior and MLE)  
+
+**Interpretation:**
+The Bayesian estimate (40%) is a compromise between our prior belief (30%) and the data evidence (44%). The posterior is "pulled" toward the data because we have substantial evidence (50 patients) relative to our prior strength (20 equivalent patients).
+
+**Credible Interval:**
+95% credible interval for $\text{Beta}(28, 42)$: [0.29, 0.52]
+
+**Clinical Decision Making:**
+$$P(p > 0.35|x) = P(\text{Beta}(28, 42) > 0.35) = 0.73$$
+
+There's a 73% probability that the true response rate exceeds 35%, which might be our threshold for proceeding to Phase III.
+
+### Example 2: Coin Flipping Bayesian Analysis
+
+**Setting Up the Prior:**
+For a coin of unknown fairness, we use a **non-informative prior**:
+$$\text{Prior: } p \sim \text{Beta}(1, 1) = \text{Uniform}(0, 1)$$
+
+This represents complete ignorance about the coin's bias.
+
+**The Data:** $x = 12$ heads in $n = 20$ flips
+
+**Posterior Calculation:**
+$$\text{Posterior: } p|x \sim \text{Beta}(1 + 12, 1 + 20 - 12) = \text{Beta}(13, 9)$$
+
+**Posterior Analysis:**
+$$E[p|x] = \frac{13}{13 + 9} = \frac{13}{22} = 0.591$$
+
+**Key Insight:** With a uniform prior, the posterior mean equals the MLE! This shows that non-informative priors yield similar results to classical methods.
+
+**Fairness Assessment:**
+$$P(0.45 < p < 0.55|x) = P(0.45 < \text{Beta}(13, 9) < 0.55) = 0.23$$
+
+Only 23% probability that the coin is approximately fair, suggesting possible bias.
+
+### Example 3: Bioavailability Study Bayesian Analysis
+
+**Setting Up the Prior:**
+Based on extensive historical data for similar formulations:
+$$\text{Prior: } p \sim \text{Beta}(17, 3)$$
+- Prior mean: $\frac{17}{20} = 0.85$ (85%)  
+- Strong prior belief (equivalent to 20 prior subjects)  
+
+**The Data:** $x = 26$ successes in $n = 30$ trials
+
+**Posterior Calculation:**
+$$\text{Posterior: } p|x \sim \text{Beta}(17 + 26, 3 + 30 - 26) = \text{Beta}(43, 7)$$
+
+**Posterior Analysis:**
+$$E[p|x] = \frac{43}{43 + 7} = \frac{43}{50} = 0.86$$
+
+**Regulatory Decision:**
+$$P(p > 0.80|x) = P(\text{Beta}(43, 7) > 0.80) = 0.95$$
+
+95% probability that bioavailability exceeds 80%, providing strong regulatory evidence.
+
+### Prior Sensitivity Analysis
+
+**Why Sensitivity Analysis?**
+Since prior selection can influence results, we should test robustness across reasonable priors.
+
+**For Oncology Example, test multiple priors:**
+
+1. **Skeptical Prior:** $\text{Beta}(3, 7)$ (30% response, weak belief)
+   - Posterior mean: $\frac{3+22}{3+7+50} = 0.42$
+
+2. **Neutral Prior:** $\text{Beta}(1, 1)$ (uniform)
+   - Posterior mean: $\frac{1+22}{1+1+50} = 0.44$
+
+3. **Optimistic Prior:** $\text{Beta}(10, 10)$ (50% response, moderate belief)
+   - Posterior mean: $\frac{10+22}{10+10+50} = 0.46$
+
+**Conclusion:** Results are reasonably robust (0.42 to 0.46) across different reasonable priors.
+
+### Advantages and Limitations
+
+**Advantages of Bayesian Approach:**
+1. **Incorporates Prior Knowledge:** Uses historical data and expert opinion
+2. **Direct Probability Statements:** Can say "95% probability that $p > 0.35$"
+3. **Natural for Sequential Learning:** Easy to update as new data arrives
+4. **Better for Small Samples:** More stable than MLE when data is limited
+5. **Decision-Theoretic Framework:** Natural for clinical decision making
+
+**Limitations of Bayesian Approach:**
+1. **Prior Specification:** Requires subjective choices that can influence results
+2. **Computational Complexity:** May require advanced algorithms for complex models
+3. **Communication Challenges:** Requires education for regulatory and clinical audiences
+4. **Prior-Data Conflict:** Difficult to detect when prior and data strongly disagree
+
+**When to Use Each Approach:**
+- **MLE:** When you want to let the data speak for itself, large samples, regulatory preference for "objective" methods  
+- **Bayesian:** When you have relevant prior information, small samples, sequential decision making, want probability statements about parameters  
+
+# Poisson Distribution: From Counting Events to Parameter Estimation
+
+## Part I: Forward Problem - From Model to Data
+
+### The Question We Are Asking
+
+**Given a known Poisson process with a specified rate parameter, what is the probability of observing a specific number of events in a fixed interval?**
+
+In this forward direction, we assume we know:
+- The true event rate $\lambda$ (events per unit time/space)  
+- The observation period or region  
+- The underlying Poisson process assumptions  
+
+**Question:** What is the probability of observing exactly $k$ events?
+
+### Mathematical Framework and Symbol Definitions
+
+**Probability Mass Function:**
+$$P(X = k) = \frac{\lambda^k e^{-\lambda}}{k!}$$
+
+**Symbol Definitions:**
+- $X$ = random variable representing the number of events observed  
+- $k$ = specific number of events we're calculating probability for (0, 1, 2, ...)  
+- $\lambda$ = rate parameter (average number of events per unit time/space)  
+- $e$ = Euler's number (≈ 2.718)  
+- $k!$ = factorial of $k$ (k × (k-1) × ... × 2 × 1)  
+
+**Key Assumptions of Poisson Process:**
+1. **Independence:** Events occur independently
+2. **Constant Rate:** Average rate $\lambda$ is constant over time/space
+3. **No Simultaneous Events:** Probability of multiple events in infinitesimal interval is negligible
+
+### Example 1: Adverse Drug Reactions in Clinical Monitoring
+
+**Clinical Setup and Known Parameters:**
+A post-marketing surveillance system monitors serious adverse drug reactions (SADRs) for a cardiovascular medication. Based on pre-approval data and early post-marketing experience, we know the rate is $\lambda = 2.8$ SADRs per 1000 patient-months.
+
+**The Question:** In a given month with 1000 patients on therapy, what is the probability of observing exactly 4 SADRs?
+
+**Known Information:**
+- $\lambda = 2.8$ (known rate per 1000 patient-months)  
+- $k = 4$ (specific outcome we're evaluating)  
+- Observation period = 1 month with 1000 patients  
+
+**Calculation:**
+$$P(X = 4) = \frac{(2.8)^4 e^{-2.8}}{4!}$$
+
+**Step-by-step computation:**
+$$(2.8)^4 = 61.4656$$
+$$e^{-2.8} = 0.06081$$
+$$4! = 24$$
+
+$$P(X = 4) = \frac{61.4656 \times 0.06081}{24} = 0.1557$$
+
+**Clinical Interpretation:**
+If the true SADR rate is 2.8 per 1000 patient-months, there is a 15.57% probability of observing exactly 4 SADRs in any given month. This is a reasonably likely outcome that would not trigger immediate safety concerns.
+
+**Safety Monitoring Context:**
+$$P(X \geq 6) = 1 - P(X \leq 5) = 1 - \sum_{k=0}^{5} \frac{(2.8)^k e^{-2.8}}{k!} = 0.1424$$
+
+A 14.24% probability of observing 6 or more SADRs might trigger enhanced surveillance protocols.
+
+### Example 2: Customer Service Call Center
+
+**Setup and Known Parameters:**
+A pharmaceutical company's medical information hotline receives calls about drug interactions. Historical data shows an average rate of $\lambda = 7.5$ calls per hour during business hours.
+
+**The Question:** What is the probability of receiving exactly 5 calls in one hour?
+
+**Known Information:**
+- $\lambda = 7.5$ (calls per hour)  
+- $k = 5$ (specific outcome)  
+- Time interval = 1 hour  
+
+**Calculation:**
+$$P(X = 5) = \frac{(7.5)^5 e^{-7.5}}{5!}$$
+
+$$P(X = 5) = \frac{23730.47 \times 0.000553}{120} = 0.1094$$
+
+**Operational Interpretation:**
+There is a 10.94% probability of receiving exactly 5 calls in any given hour. This information helps with staffing decisions and capacity planning.
+
+### Example 3: Pharmacokinetic Metabolite Formation
+
+**Setup and Known Parameters:**
+In hepatic microsome studies, we measure metabolite formation from a parent drug. The enzymatic process follows first-order kinetics with an average formation rate of $\lambda = 15.2$ molecules per second per milligram of microsomal protein.
+
+**The Question:** What is the probability of observing exactly 18 molecules formed in one second?
+
+**Known Information:**
+- $\lambda = 15.2$ (molecules per second per mg protein)  
+- $k = 18$ (specific outcome)  
+- Time interval = 1 second  
+
+**Calculation:**
+$$P(X = 18) = \frac{(15.2)^{18} e^{-15.2}}{18!}$$
+
+Using computational methods for large factorials:
+$$P(X = 18) = 0.0421$$
+
+**Biochemical Interpretation:**
+There is a 4.21% probability of observing exactly 18 metabolite molecules in one second. This relatively low probability reflects the natural variability in enzymatic processes.
+
+## Part II: Inverse Problem - From Data to Model (Maximum Likelihood Estimation)
+
+### The Fundamental Question We Are Asking
+
+**Given observed count data, what is the most likely value of the rate parameter $\lambda$ that could have generated this data?**
+
+In this inverse direction, we observe:
+- The actual number of events $x_1, x_2, \ldots, x_n$ (the data)  
+- The observation periods (usually equal)  
+
+**Question:** What is the most likely value of the event rate $\lambda$ that produced our observed counts?
+
+### The Logic of Maximum Likelihood for Poisson
+
+**Conceptual Framework:**
+1. We observe count data from multiple time periods
+2. We assume the data came from a Poisson process
+3. We ask: "Of all possible values of $\lambda$, which one makes our observed data most probable?"
+4. The MLE is the value of $\lambda$ that maximizes the probability of observing our actual data
+
+### Mathematical Development
+
+**Likelihood Function for Multiple Observations:**
+For $n$ independent observations $x_1, x_2, \ldots, x_n$:
+
+$$L(\lambda) = \prod_{i=1}^n \frac{\lambda^{x_i} e^{-\lambda}}{x_i!} = \frac{\lambda^{\sum x_i} e^{-n\lambda}}{\prod_{i=1}^n x_i!}$$
+
+**Symbol Definitions for MLE:**
+- $L(\lambda)$ = likelihood function (probability of observed data given parameter $\lambda$)  
+- $x_i$ = observed count in period $i$ (the actual data we collected)  
+- $n$ = number of observation periods  
+- $\lambda$ = unknown rate parameter we want to estimate  
+- $\hat{\lambda}_{MLE}$ = maximum likelihood estimate of $\lambda$  
+- $\sum x_i$ = total number of events across all periods  
+- $\prod x_i!$ = product of factorials (constant for given data)  
+
+**Log-Likelihood Function:**
+$$\ell(\lambda) = \log L(\lambda) = \sum_{i=1}^n x_i \log(\lambda) - n\lambda - \sum_{i=1}^n \log(x_i!)$$
+
+**Components:**
+- $\sum_{i=1}^n x_i \log(\lambda)$ = contribution from observed events  
+- $-n\lambda$ = penalty term (larger $\lambda$ less likely if few events observed)  
+- $-\sum_{i=1}^n \log(x_i!)$ = constant term (doesn't affect optimization)  
+
+### Finding the Maximum Likelihood Estimate
+
+**Step 1: Take the Derivative**
+$$\frac{d\ell(\lambda)}{d\lambda} = \frac{\sum_{i=1}^n x_i}{\lambda} - n$$
+
+**Step 2: Set Equal to Zero (First-Order Condition)**
+$$\frac{\sum_{i=1}^n x_i}{\lambda} - n = 0$$
+
+**Step 3: Solve for $\lambda$**
+$$\frac{\sum_{i=1}^n x_i}{\lambda} = n$$
+$$\hat{\lambda}_{MLE} = \frac{\sum_{i=1}^n x_i}{n} = \bar{x}$$
+
+**The Result:** The MLE is simply the sample mean of the observed counts!
+
+### Advanced MLE Theory for Poisson
+
+**Fisher Information:**
+$$I(\lambda) = -E\left[\frac{d^2\ell(\lambda)}{d\lambda^2}\right] = \frac{n}{\lambda}$$
+
+**Interpretation:**
+- Fisher information increases with sample size $n$  
+- Information decreases as $\lambda$ increases (more variability)  
+- Higher information leads to more precise estimates  
+
+**Asymptotic Properties:**
+For large $n$:
+$$\hat{\lambda}_{MLE} \sim N\left(\lambda, \frac{\lambda}{n}\right)$$
+
+**Key Properties:**
+- **Unbiased:** $E[\hat{\lambda}_{MLE}] = \lambda$  
+- **Consistent:** $\hat{\lambda}_{MLE} \xrightarrow{p} \lambda$ as $n \to \infty$  
+- **Efficient:** Achieves Cramér-Rao lower bound  
+- **Asymptotically Normal:** Approximately normal for large $n$  
+
+### Example 1: SADR Monitoring MLE Analysis
+
+**The Data and Question:**
+Over 12 months of monitoring, we observed the following SADRs per month:
+3, 2, 4, 1, 5, 2, 3, 4, 2, 3, 1, 4
+
+**Question:** What is our best estimate of the true SADR rate $\lambda$?
+
+**MLE Calculation:**
+$$\hat{\lambda}_{MLE} = \frac{\sum_{i=1}^{12} x_i}{12} = \frac{3+2+4+1+5+2+3+4+2+3+1+4}{12} = \frac{34}{12} = 2.833$$
+
+**Standard Error:**
+$$SE(\hat{\lambda}_{MLE}) = \sqrt{\frac{\hat{\lambda}_{MLE}}{n}} = \sqrt{\frac{2.833}{12}} = 0.486$$
+
+**95% Confidence Interval:**
+$$CI_{95\%} = 2.833 \pm 1.96 \times 0.486 = [1.881, 3.785]$$
+
+**Safety Assessment:**
+- Our best estimate is 2.83 SADRs per 1000 patient-months  
+- We are 95% confident the true rate lies between 1.88 and 3.79  
+- This is consistent with the pre-approval estimate of 2.8  
+- No evidence of increased post-marketing risk  
+
+**Likelihood Ratio Test for Safety Signal:**
+To test $H_0: \lambda = 2.8$ vs. $H_1: \lambda \neq 2.8$:
+$$\Lambda = 2[\ell(\hat{\lambda}) - \ell(2.8)] = 2n[\hat{\lambda} - 2.8 - \hat{\lambda}\log(\hat{\lambda}/2.8)]$$
+$$\Lambda = 2 \times 12 \times [2.833 - 2.8 - 2.833\log(2.833/2.8)] = 0.026$$
+
+Since $\Lambda = 0.026 < 3.84 = \chi^2_{1,0.05}$, we do not reject $H_0$. No evidence of changed safety profile.
+
+### Example 2: Call Center MLE Analysis
+
+**The Data and Question:**
+Over 24 hours, we recorded calls per hour:
+8, 6, 9, 7, 5, 8, 7, 9, 6, 8, 7, 6, 9, 8, 7, 5, 8, 9, 6, 7, 8, 6, 9, 7
+
+**Question:** What is our best estimate of the call rate $\lambda$?
+
+**MLE Calculation:**
+$$\hat{\lambda}_{MLE} = \frac{180}{24} = 7.5 \text{ calls per hour}$$
+
+**Overdispersion Analysis:**
+Sample variance: $s^2 = \frac{\sum(x_i - \bar{x})^2}{n-1} = 1.826$
+Expected variance under Poisson: $\hat{\lambda} = 7.5$
+
+**Dispersion Index:** $D = \frac{s^2}{\hat{\lambda}} = \frac{1.826}{7.5} = 0.243$
+
+**Interpretation:** $D < 1$ indicates **underdispersion** (less variability than expected under Poisson). This might suggest:
+- Call arrivals are more regular than random  
+- Possible time-of-day effects not captured in the model  
+- Need for alternative models (e.g., negative binomial)  
+
+### Example 3: Metabolite Formation MLE Analysis
+
+**The Data and Question:**
+Over 20 seconds, we counted molecules formed per second:
+14, 16, 13, 17, 15, 18, 12, 16, 14, 15, 17, 13, 16, 15, 14, 18, 16, 13, 15, 17
+
+**Question:** What is our best estimate of the formation rate $\lambda$?
+
+**MLE Calculation:**
+$$\hat{\lambda}_{MLE} = \frac{304}{20} = 15.2 \text{ molecules per second}$$
+
+**Precision Analysis:**
+$$SE(\hat{\lambda}_{MLE}) = \sqrt{\frac{15.2}{20}} = 0.872$$
+
+**Coefficient of Variation:**
+$$CV = \frac{SE}{\hat{\lambda}} = \frac{0.872}{15.2} = 0.057 = 5.7\%$$
+
+**Biochemical Interpretation:**
+- The formation rate is estimated at 15.2 molecules/second  
+- The low CV (5.7%) indicates high precision  
+- This precision supports reliable kinetic parameter estimation  
+
+### Goodness-of-Fit Testing
+
+**Pearson Chi-Square Test:**
+Test whether data follows Poisson distribution:
+$$\chi^2 = \sum_{k} \frac{(O_k - E_k)^2}{E_k}$$
+
+Where:
+- $O_k$ = observed frequency of count $k$  
+- $E_k = n \times P(X = k|\hat{\lambda})$ = expected frequency  
+
+**For SADR Example:**
+Observed counts: 1 appears 2 times, 2 appears 3 times, 3 appears 3 times, 4 appears 3 times, 5 appears 1 time
+
+Expected frequencies under Poisson(2.833) can be calculated and compared.
+
+## Part III: Bayesian Approach - Gamma-Poisson Conjugacy
+
+### The Fundamental Question We Are Asking
+
+**Given our prior beliefs about the event rate and observed count data, what should we believe about the rate parameter now?**
+
+In the Bayesian approach for Poisson data, we:
+1. Start with prior beliefs about $\lambda$ (before seeing data)
+2. Observe count data
+3. Update our beliefs using Bayes' theorem
+4. End with posterior beliefs about $\lambda$ (after seeing data)
+
+### Gamma-Poisson Conjugacy: Mathematical Elegance
+
+**Why Gamma Prior?**
+The Gamma distribution is the **conjugate prior** for the Poisson likelihood:
+- Prior: Gamma distribution  
+- Likelihood: Poisson  
+- Posterior: Also Gamma distribution  
+
+**Gamma Distribution:**
+$$f(\lambda|\alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)} \lambda^{\alpha-1} e^{-\beta\lambda}$$
+
+**Symbol Definitions:**
+- $\alpha$ = shape parameter (prior "events")  
+- $\beta$ = rate parameter (prior "time periods")  
+- $\Gamma(\alpha)$ = gamma function  
+- Prior mean: $E[\lambda] = \frac{\alpha}{\beta}$  
+- Prior variance: $\text{Var}(\lambda) = \frac{\alpha}{\beta^2}$  
+
+**Prior Interpretation:**
+Think of the prior as representing $\alpha$ events observed over $\beta$ time periods, giving a rate of $\frac{\alpha}{\beta}$.
+
+### Bayesian Updating Formula
+
+**Conjugate Updating:**
+$$\text{Prior: } \lambda \sim \text{Gamma}(\alpha_0, \beta_0)$$
+$$\text{Data: } \sum x_i \text{ total events in } n \text{ periods}$$
+$$\text{Posterior: } \lambda|X \sim \text{Gamma}(\alpha_0 + \sum x_i, \beta_0 + n)$$
+
+**Posterior Parameters:**
+- $\alpha_n = \alpha_0 + \sum x_i$ (prior events + observed events)  
+- $\beta_n = \beta_0 + n$ (prior periods + observed periods)  
+
+**Posterior Mean:**
+$$E[\lambda|X] = \frac{\alpha_0 + \sum x_i}{\beta_0 + n}$$
+
+This is a **weighted average** of prior rate and sample rate:
+$$E[\lambda|X] = \frac{\beta_0}{\beta_0 + n} \times \frac{\alpha_0}{\beta_0} + \frac{n}{\beta_0 + n} \times \frac{\sum x_i}{n}$$
+
+### Example 1: SADR Monitoring Bayesian Analysis
+
+**Setting Up the Prior:**
+Based on pre-approval safety data, we believe:
+- Most likely rate: 2.8 SADRs per 1000 patient-months  
+- Moderate confidence (equivalent to about 3 months of prior data)  
+
+**Prior Selection:** $\text{Gamma}(8.4, 3)$
+- Prior mean: $\frac{8.4}{3} = 2.8$  
+- Prior "sample size": 3 periods  
+- Prior standard deviation: $\sqrt{\frac{8.4}{9}} = 0.966$  
+
+**The Data:** $\sum x_i = 34$ total SADRs in $n = 12$ months
+
+**Posterior Calculation:**
+$$\text{Posterior: } \lambda|X \sim \text{Gamma}(8.4 + 34, 3 + 12) = \text{Gamma}(42.4, 15)$$
+
+**Posterior Analysis:**
+$$E[\lambda|X] = \frac{42.4}{15} = 2.827$$
+
+**Comparison of Estimates:**
+- Prior mean: 2.8  
+- MLE: 2.833  
+- Posterior mean: 2.827 (very close to both)  
+
+**Interpretation:**
+The posterior mean (2.827) is nearly identical to both the prior mean and MLE because:
+1. The prior and data are in close agreement
+2. We have substantial data (12 months) relative to prior strength (3 months)
+
+**Safety Decision Making:**
+$$P(\lambda > 3.5|X) = P(\text{Gamma}(42.4, 15) > 3.5) = 0.058$$
+
+Only 5.8% probability that the true rate exceeds 3.5 SADRs per 1000 patient-months, providing reassurance about safety.
+
+**95% Credible Interval:**
+For $\text{Gamma}(42.4, 15)$: [2.01, 3.72]
+
+We are 95% certain the true rate lies between 2.01 and 3.72 SADRs per 1000 patient-months.
+
+### Example 2: Call Center Bayesian Analysis
+
+**Setting Up the Prior:**
+For call center planning, we use a **vague prior** to let the data dominate:
+$$\text{Prior: } \lambda \sim \text{Gamma}(1, 0.2)$$
+- Prior mean: $\frac{1}{0.2} = 5$ (weak prior belief)  
+- Very low prior precision  
+
+**The Data:** $\sum x_i = 180$ calls in $n = 24$ hours
+
+**Posterior Calculation:**
+$$\text{Posterior: } \lambda|X \sim \text{Gamma}(1 + 180, 0.2 + 24) = \text{Gamma}(181, 24.2)$$
+
+**Posterior Analysis:**
+$$E[\lambda|X] = \frac{181}{24.2} = 7.48$$
+
+**Capacity Planning:**
+$$P(\lambda > 8|X) = P(\text{Gamma}(181, 24.2) > 8) = 0.234$$
+
+23.4% probability that the true rate exceeds 8 calls/hour, informing staffing decisions for peak capacity.
+
+### Example 3: Metabolite Formation Bayesian Analysis
+
+**Setting Up the Prior:**
+Based on extensive literature on similar enzymatic processes:
+$$\text{Prior: } \lambda \sim \text{Gamma}(76, 5)$$
+- Prior mean: $\frac{76}{5} = 15.2$ (strong prior belief)  
+- High prior precision (equivalent to 5 prior observations)  
+
+**The Data:** $\sum x_i = 304$ molecules in $n = 20$ seconds
+
+**Posterior Calculation:**
+$$\text{Posterior: } \lambda|X \sim \text{Gamma}(76 + 304, 5 + 20) = \text{Gamma}(380, 25)$$
+
+**Posterior Analysis:**
+$$E[\lambda|X] = \frac{380}{25} = 15.2$$
+
+**Perfect Agreement:** The posterior mean exactly equals both the prior mean and MLE, indicating perfect harmony between prior knowledge and observed data.
+
+**Precision Analysis:**
+Posterior coefficient of variation: $\frac{\sqrt{380/625}}{15.2} = 0.051 = 5.1\%$
+
+The very low CV indicates extremely high precision in our rate estimate.
+
+### Prior Sensitivity Analysis
+
+**For SADR Example, test multiple priors:**
+
+1. **Skeptical Prior:** $\text{Gamma}(5.6, 2)$ (rate = 2.8, weaker belief)
+   - Posterior mean: $\frac{5.6+34}{2+12} = 2.83$
+
+2. **Neutral Prior:** $\text{Gamma}(0.1, 0.1)$ (vague prior)
+   - Posterior mean: $\frac{0.1+34}{0.1+12} = 2.82$
+
+3. **Conservative Prior:** $\text{Gamma}(14, 5)$ (rate = 2.8, strong belief)
+   - Posterior mean: $\frac{14+34}{5+12} = 2.82$
+
+**Conclusion:** Results are very robust (2.82 to 2.83) across different reasonable priors, indicating that the data dominates the inference.
+
+### Posterior Predictive Distribution
+
+**Future Observations:**
+For predicting the number of SADRs in the next month, the posterior predictive distribution is:
+$$X_{new}|X \sim \text{NegativeBinomial}(\alpha_n, \frac{\beta_n}{\beta_n + 1})$$
+
+This **Negative Binomial** distribution naturally accounts for:
+1. Uncertainty in the rate parameter $\lambda$
+2. Overdispersion relative to Poisson
+3. More realistic prediction intervals
+
+**For SADR Example:**
+$$X_{new}|X \sim \text{NegativeBinomial}(42.4, \frac{15}{16})$$
+
+**Prediction:**
+$$P(X_{new} \leq 5|X) = 0.89$$
+
+89% probability that next month will have 5 or fewer SADRs, useful for resource planning.
+
+### Advantages and Limitations
+
+**Advantages of Bayesian Approach:**
+1. **Incorporates Historical Data:** Uses previous studies and expert knowledge
+2. **Natural Overdispersion:** Posterior predictive is Negative Binomial
+3. **Sequential Learning:** Easy to update with new data
+4. **Uncertainty Quantification:** Full posterior distribution available
+5. **Decision Making:** Direct probability statements for thresholds
+
+**Limitations of Bayesian Approach:**
+1. **Prior Specification:** Requires thoughtful prior selection
+2. **Computational Requirements:** May need numerical methods for complex models
+3. **Communication:** Requires stakeholder education
+4. **Model Assumptions:** Still assumes Poisson process within periods
+
+**When to Use Each Approach:**
+- **MLE:** Large samples, regulatory preference for "objective" methods, goodness-of-fit testing  
+- **Bayesian:** Historical data available, small samples, sequential monitoring, decision-making contexts  
+
+# Normal Distribution: The Foundation of Statistical Inference
+
+## Part I: Forward Problem - From Model to Data
+
+### The Question We Are Asking
+
+**Given a normal distribution with known parameters $\mu$ (mean) and $\sigma^2$ (variance), what is the probability that a randomly selected observation falls within a specific range?**
+
+In this forward direction, we assume we know:
+- The true population mean $\mu$  
+- The true population variance $\sigma^2$ (or standard deviation $\sigma$)  
+- The underlying normal distribution model  
+
+**Question:** What is the probability that an observation $X$ falls in a given interval $[a, b]$?
+
+### Mathematical Framework and Symbol Definitions
+
+**Probability Density Function:**
+$$f(x|\mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+
+**Symbol Definitions:**
+- $f(x|\mu, \sigma^2)$ = probability density at point $x$ given parameters $\mu$ and $\sigma^2$  
+- $x$ = specific value we're evaluating  
+- $\mu$ = population mean (location parameter)  
+- $\sigma^2$ = population variance (scale parameter squared)  
+- $\sigma$ = population standard deviation (scale parameter)  
+- $\pi$ = mathematical constant (≈ 3.14159)  
+- $e$ = Euler's number (≈ 2.71828)  
+
+**Probability Calculation:**
+$$P(a \leq X \leq b) = \int_a^b f(x|\mu, \sigma^2) dx = \Phi\left(\frac{b-\mu}{\sigma}\right) - \Phi\left(\frac{a-\mu}{\sigma}\right)$$
+
+Where $\Phi(\cdot)$ is the standard normal cumulative distribution function.
+
+### Example 1: Systolic Blood Pressure Reduction (Cardiovascular Trial)
+
+**Clinical Setup and Known Parameters:**
+A well-established ACE inhibitor has been extensively studied. Population data shows that systolic blood pressure (SBP) reductions follow a normal distribution with mean $\mu = 15$ mmHg and standard deviation $\sigma = 8$ mmHg.
+
+**The Question:** What is the probability that a randomly selected patient will experience a reduction between 10 and 20 mmHg?
+
+**Known Information:**
+- $\mu = 15$ mmHg (population mean reduction)  
+- $\sigma = 8$ mmHg (population standard deviation)  
+- $a = 10$ mmHg, $b = 20$ mmHg (interval of interest)  
+
+**Calculation:**
+$$P(10 \leq X \leq 20) = \Phi\left(\frac{20-15}{8}\right) - \Phi\left(\frac{10-15}{8}\right)$$
+$$= \Phi(0.625) - \Phi(-0.625)$$
+$$= 0.734 - 0.266 = 0.468$$
+
+**Clinical Interpretation:**
+There is a 46.8% probability that a randomly selected patient will experience an SBP reduction between 10 and 20 mmHg. This represents nearly half of all patients, indicating that this range captures a substantial portion of the expected therapeutic response.
+
+**Additional Clinical Probabilities:**
+- $P(X > 20) = 1 - \Phi(0.625) = 0.266$ (26.6% chance of >20 mmHg reduction)  
+- $P(X < 5) = \Phi(-1.25) = 0.106$ (10.6% chance of <5 mmHg reduction)  
+
+### Example 2: IQ Scores in Cognitive Assessment
+
+**Setup and Known Parameters:**
+IQ scores in the general population follow a normal distribution with $\mu = 100$ and $\sigma = 15$.
+
+**The Question:** What is the probability that a randomly selected individual has an IQ between 85 and 115?
+
+**Known Information:**
+- $\mu = 100$ (population mean IQ)  
+- $\sigma = 15$ (population standard deviation)  
+- $a = 85$, $b = 115$ (one standard deviation around the mean)  
+
+**Calculation:**
+$$P(85 \leq X \leq 115) = \Phi\left(\frac{115-100}{15}\right) - \Phi\left(\frac{85-100}{15}\right)$$
+$$= \Phi(1) - \Phi(-1) = 0.841 - 0.159 = 0.682$$
+
+**Interpretation:**
+Approximately 68.2% of the population has IQ scores within one standard deviation of the mean. This demonstrates the empirical rule (68-95-99.7 rule) for normal distributions.
+
+### Example 3: Drug Clearance in Pharmacokinetic Studies
+
+**Setup and Known Parameters:**
+Renal clearance of a drug in healthy adults follows a normal distribution with $\mu = 8.5$ L/h and $\sigma = 1.2$ L/h.
+
+**The Question:** What is the probability that a patient has clearance between 7.0 and 10.0 L/h?
+
+**Calculation:**
+$$P(7.0 \leq X \leq 10.0) = \Phi\left(\frac{10.0-8.5}{1.2}\right) - \Phi\left(\frac{7.0-8.5}{1.2}\right)$$
+$$= \Phi(1.25) - \Phi(-1.25) = 0.894 - 0.106 = 0.788$$
+
+**Pharmacokinetic Interpretation:**
+78.8% of patients have clearance values in this range, which is important for dosing decisions and identifying patients who may need dose adjustments.
+
+## Part II: Inverse Problem - From Data to Model
+
+The inverse problem for normal distributions has three scenarios based on what parameters are unknown:
+
+1. **Mean unknown, variance known**
+2. **Variance unknown, mean known**  
+3. **Both mean and variance unknown**
+
+## Case 1: Mean Unknown, Variance Known
+
+### The Fundamental Question We Are Asking
+
+**Given observed data and a known variance, what is the most likely value of the population mean that could have generated this data?**
+
+We observe:
+- Sample data $x_1, x_2, \ldots, x_n$  
+- Known population variance $\sigma^2$  
+
+**Question:** What is our best estimate of the unknown population mean $\mu$?
+
+### Maximum Likelihood Estimation for Mean
+
+**Likelihood Function:**
+$$L(\mu) = \prod_{i=1}^n \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)$$
+
+**Log-Likelihood Function:**
+$$\ell(\mu) = -\frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^n(x_i-\mu)^2$$
+
+**Symbol Definitions for MLE:**
+- $L(\mu)$ = likelihood function (probability of observed data given $\mu$)  
+- $\ell(\mu)$ = log-likelihood function  
+- $x_i$ = individual observations in our sample  
+- $n$ = sample size  
+- $\mu$ = unknown population mean we want to estimate  
+- $\sigma^2$ = known population variance  
+
+**Finding the MLE:**
+$$\frac{d\ell(\mu)}{d\mu} = \frac{1}{\sigma^2}\sum_{i=1}^n(x_i-\mu) = 0$$
+
+**Solution:**
+$$\hat{\mu}_{MLE} = \frac{1}{n}\sum_{i=1}^n x_i = \bar{x}$$
+
+**The Result:** The MLE of the mean is the sample mean!
+
+### Example 1: Blood Pressure Reduction MLE Analysis
+
+**The Data and Question:**
+In a clinical trial with known $\sigma = 8$ mmHg, we observed SBP reductions (mmHg) in 20 patients:
+18, 22, 15, 19, 21, 17, 20, 16, 23, 14, 12, 25, 18, 16, 19, 21, 17, 20, 15, 24
+
+**Question:** What is our best estimate of the true mean SBP reduction $\mu$?
+
+**MLE Calculation:**
+$$\hat{\mu}_{MLE} = \bar{x} = \frac{1}{20}\sum_{i=1}^{20} x_i = \frac{372}{20} = 18.6 \text{ mmHg}$$
+
+**Standard Error:**
+$$SE(\hat{\mu}_{MLE}) = \frac{\sigma}{\sqrt{n}} = \frac{8}{\sqrt{20}} = 1.789 \text{ mmHg}$$
+
+**95% Confidence Interval:**
+$$CI_{95\%} = 18.6 \pm 1.96 \times 1.789 = [15.09, 22.11] \text{ mmHg}$$
+
+**Clinical Interpretation:**
+- Our best estimate of the true mean SBP reduction is 18.6 mmHg  
+- We are 95% confident the true mean lies between 15.09 and 22.11 mmHg  
+- This represents a clinically significant reduction (>10 mmHg is typically meaningful)  
+- The relatively narrow confidence interval reflects the known variance and adequate sample size  
+
+### Bayesian Analysis for Mean (Known Variance)
+
+**The Question:** How should we update our beliefs about the mean given prior knowledge and observed data?
+
+**Prior Distribution:**
+$$\mu \sim N(\mu_0, \tau_0^2)$$
+
+**Posterior Distribution:**
+$$\mu|X \sim N(\mu_n, \tau_n^2)$$
+
+**Updating Formulas:**
+$$\frac{1}{\tau_n^2} = \frac{1}{\tau_0^2} + \frac{n}{\sigma^2}$$
+$$\mu_n = \frac{\frac{\mu_0}{\tau_0^2} + \frac{n\bar{x}}{\sigma^2}}{\frac{1}{\tau_0^2} + \frac{n}{\sigma^2}}$$
+
+### Example 1: Blood Pressure Bayesian Analysis
+
+**Prior Setup:**
+Based on previous ACE inhibitor studies: $\mu \sim N(15, 16)$ (prior mean = 15 mmHg, prior SD = 4 mmHg)
+
+**Data:** $n = 20$, $\bar{x} = 18.6$, $\sigma^2 = 64$
+
+**Posterior Calculation:**
+$$\frac{1}{\tau_n^2} = \frac{1}{16} + \frac{20}{64} = 0.0625 + 0.3125 = 0.375$$
+$$\tau_n^2 = 2.667, \quad \tau_n = 1.633$$
+
+$$\mu_n = \frac{15/16 + 20 \times 18.6/64}{0.375} = \frac{0.9375 + 5.8125}{0.375} = 18.0$$
+
+**Posterior Distribution:**
+$$\mu|X \sim N(18.0, 2.667)$$
+
+**95% Credible Interval:**
+$$CI_{95\%} = 18.0 \pm 1.96 \times 1.633 = [14.8, 21.2]$$
+
+**Interpretation:**
+- The posterior mean (18.0) is between the prior mean (15.0) and sample mean (18.6)  
+- The Bayesian estimate incorporates both prior knowledge and current data  
+- The credible interval is narrower than the frequentist CI due to prior information  
+
+## Case 2: Variance Unknown, Mean Known
+
+### The Fundamental Question We Are Asking
+
+**Given observed data and a known mean, what is the most likely value of the population variance that could have generated this data?**
+
+This scenario is less common in practice but important for understanding variance estimation.
+
+### MLE for Variance (Known Mean)
+
+**Log-Likelihood:**
+$$\ell(\sigma^2) = -\frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^n(x_i-\mu)^2$$
+
+**MLE Solution:**
+$$\hat{\sigma^2}_{MLE} = \frac{1}{n}\sum_{i=1}^n(x_i-\mu)^2$$
+
+**Sampling Distribution:**
+$$\frac{n\hat{\sigma^2}_{MLE}}{\sigma^2} \sim \chi^2_n$$
+
+### Bayesian Analysis for Variance (Known Mean)
+
+**Prior:** $\sigma^2 \sim \text{InverseGamma}(\alpha_0, \beta_0)$
+
+**Posterior:** $\sigma^2|X \sim \text{InverseGamma}\left(\alpha_0 + \frac{n}{2}, \beta_0 + \frac{1}{2}\sum_{i=1}^n(x_i-\mu)^2\right)$
+
+## Case 3: Both Mean and Variance Unknown
+
+### The Fundamental Question We Are Asking
+
+**Given observed data, what are the most likely values of both the population mean and variance that could have generated this data?**
+
+This is the most common scenario in practice.
+
+### Joint MLE for Mean and Variance
+
+**Joint Likelihood:**
+$$L(\mu, \sigma^2) = \prod_{i=1}^n \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)$$
+
+**MLE Solutions:**
+$$\hat{\mu}_{MLE} = \bar{x}$$
+$$\hat{\sigma^2}_{MLE} = \frac{1}{n}\sum_{i=1}^n(x_i-\bar{x})^2$$
+
+**Note:** The MLE for variance is biased. The unbiased estimator is:
+$$s^2 = \frac{1}{n-1}\sum_{i=1}^n(x_i-\bar{x})^2$$
+
+### Sampling Distributions
+
+**Sample Mean:**
+$$\bar{X} \sim N\left(\mu, \frac{\sigma^2}{n}\right)$$
+
+**Sample Variance:**
+$$\frac{(n-1)s^2}{\sigma^2} \sim \chi^2_{n-1}$$
+
+**t-Distribution for Mean:**
+$$T = \frac{\bar{X} - \mu}{s/\sqrt{n}} \sim t_{n-1}$$
+
+### Example: Complete Analysis with Unknown Parameters
+
+**The Data:**
+Blood pressure reductions: 18, 22, 15, 19, 21, 17, 20, 16, 23, 14, 12, 25, 18, 16, 19, 21, 17, 20, 15, 24
+
+**MLE Calculations:**
+$$\hat{\mu}_{MLE} = 18.6 \text{ mmHg}$$
+$$\hat{\sigma^2}_{MLE} = \frac{1}{20}\sum_{i=1}^{20}(x_i - 18.6)^2 = 12.84$$
+$$\hat{\sigma}_{MLE} = 3.58 \text{ mmHg}$$
+
+**Unbiased Variance Estimate:**
+$$s^2 = \frac{20}{19} \times 12.84 = 13.52$$
+$$s = 3.68 \text{ mmHg}$$
+
+**Confidence Interval for Mean (using t-distribution):**
+$$CI_{95\%} = 18.6 \pm t_{19,0.025} \times \frac{3.68}{\sqrt{20}} = 18.6 \pm 2.093 \times 0.823 = [16.88, 20.32]$$
+
+### Bayesian Analysis: Normal-Inverse-Gamma Conjugacy
+
+**The Question:** How do we simultaneously estimate both mean and variance using Bayesian methods?
+
+**Joint Prior (Normal-Inverse-Gamma):**
+$$\mu|\sigma^2 \sim N\left(\mu_0, \frac{\sigma^2}{\kappa_0}\right)$$
+$$\sigma^2 \sim \text{InverseGamma}(\alpha_0, \beta_0)$$
+
+**Symbol Definitions:**
+- $\mu_0$ = prior mean for $\mu$  
+- $\kappa_0$ = prior precision parameter (higher = stronger belief about $\mu$)  
+- $\alpha_0$ = prior shape parameter for $\sigma^2$  
+- $\beta_0$ = prior scale parameter for $\sigma^2$  
+
+**Posterior Parameters:**
+$$\mu_n = \frac{\kappa_0 \mu_0 + n\bar{x}}{\kappa_0 + n}$$
+$$\kappa_n = \kappa_0 + n$$
+$$\alpha_n = \alpha_0 + \frac{n}{2}$$
+$$\beta_n = \beta_0 + \frac{1}{2}\sum_{i=1}^n(x_i-\bar{x})^2 + \frac{\kappa_0 n(\bar{x}-\mu_0)^2}{2(\kappa_0 + n)}$$
+
+**Marginal Posteriors:**
+$$\sigma^2|X \sim \text{InverseGamma}(\alpha_n, \beta_n)$$
+$$\mu|X \sim t_{2\alpha_n}\left(\mu_n, \frac{\beta_n}{\alpha_n \kappa_n}\right)$$
+
+### Example: Complete Bayesian Analysis
+
+**Prior Specification:**
+$$\mu_0 = 15, \quad \kappa_0 = 2, \quad \alpha_0 = 3, \quad \beta_0 = 24$$
+
+**Data:** $n = 20$, $\bar{x} = 18.6$, $\sum(x_i-\bar{x})^2 = 256.8$
+
+**Posterior Parameters:**
+$$\mu_n = \frac{2 \times 15 + 20 \times 18.6}{2 + 20} = \frac{402}{22} = 18.27$$
+$$\kappa_n = 22$$
+$$\alpha_n = 3 + 10 = 13$$
+$$\beta_n = 24 + 128.4 + \frac{2 \times 20 \times (18.6-15)^2}{44} = 24 + 128.4 + 5.89 = 158.29$$
+
+**Posterior Means:**
+$$E[\mu|X] = 18.27 \text{ mmHg}$$
+$$E[\sigma^2|X] = \frac{158.29}{13-1} = 13.19$$
+
+**95% Credible Intervals:**
+For $\mu$: Using $t_{26}$ distribution: [16.8, 19.7]
+For $\sigma^2$: Using Inverse-Gamma: [8.2, 22.1]
+
+**Clinical Interpretation:**
+- The Bayesian mean estimate (18.27) incorporates prior knowledge  
+- Both mean and variance estimates are close to classical results  
+- Credible intervals provide direct probability statements about parameters  
+- The analysis naturally accounts for uncertainty in both parameters  
+
+### Advanced Considerations and Diagnostics
+
+**Model Checking:**
+1. **Normality Assessment:** Q-Q plots, Shapiro-Wilk test
+2. **Outlier Detection:** Standardized residuals, Cook's distance
+3. **Homoscedasticity:** Residual plots
+
+**Robust Alternatives:**
+1. **t-Distribution:** Heavier tails for outlier resistance
+2. **Mixture Models:** Multiple normal components
+3. **Transformation:** Log, Box-Cox transformations
+
+**Sample Size Considerations:**
+- Small samples: t-distribution more appropriate than normal  
+- Large samples: Central Limit Theorem ensures normality of sample mean  
+- Rule of thumb: n ≥ 30 for normal approximation  
+
+
